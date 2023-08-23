@@ -1,4 +1,5 @@
-# Twilio Flex Conversations Park an Interaction Plugin
+# Twilio Flex Conversations Park an Interaction Plugin With Sync Doc Map ()
+This is a sample custom Plugin to use use Sync when a Interaction is parked to store some conversations data.
 
 ## Disclaimer
 
