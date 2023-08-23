@@ -1,9 +1,19 @@
-const path = Runtime.getFunctions()['response-header'].path
-const response = require(path).response()
+const path = Runtime.getFunctions()['response-header'].path;
+const response = require(path).response();
+const getTokenPath = Runtime.getFunctions()['getToken'].path;
+const SyncClient = require('twilio-sync').Client;
 
 exports.handler = async function (context, event, callback) {
   const client = context.getTwilioClient()
   const CONVERSATIONS_WEBHOOK_URL = context.CONVERSATIONS_WEBHOOK_URL
+  
+  const syncToken = require(getTokenPath);
+  const sync = await syncToken.getSyncToken();
+  //console.log('####### syncToken ', sync.token)
+
+  const syncClient = new SyncClient(sync.token);
+  //console.log('####### token ', syncToken.token)
+
 
   const interactionSid = event.interactionSid
   const channelSid = event.channelSid
@@ -59,6 +69,32 @@ exports.handler = async function (context, event, callback) {
             console.log(conversation)
           })
       })
+
+    // Open a Sync Map by unique name and update its data  
+    await syncClient.map(workerName)
+          .then(async (map) => {
+            console.log('Successfully added/updated a map. SID:', map.sid);
+            try {
+              await map.set(conversationSid, { 
+                  interactionSid : interactionSid,
+                  flexInteractionChannelSid : channelSid,
+                  participantSid : participantSid,
+                  workflowSid : workflowSid,
+                  taskChannelUniqueName : taskChannelUniqueName,
+                  targetSid : targetSid,
+                  taskAttributes : taskAttributes
+                }, { ttl: 86400 });
+ 
+            } catch (error) {
+              console.error('#### Sync - add Map Item failed', error);
+            }
+            map.on('itemUpdated', (event) => {
+              console.log('Received an "itemUpdated" event:', event);
+          });
+    })
+    .catch((error) => {
+      console.error('Unexpected error adding a MAP', error);
+    });
 
     callback(null, response)
   } catch (error) {

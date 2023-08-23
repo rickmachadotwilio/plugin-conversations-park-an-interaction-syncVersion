@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "@twilio/runtime-handler": "1.2.3",
-    "twilio": "^3.56"
+    "twilio": "^3.56",
+    "twilio-sync": "^3.2.2"
   },
   "devDependencies": {
     "twilio-run": "^3.4.2"
